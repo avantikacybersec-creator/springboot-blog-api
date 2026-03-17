@@ -12,10 +12,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class CommentService{
+
+    private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
 
     @Autowired
     private CommentRepository commentRepository;
@@ -25,28 +28,38 @@ public class CommentService{
 
     public CommentDto addComment(Long postId,Comment comment){
 
-        Post post   =postRepository.findById(postId)
+        logger.info("Adding comment for postId : {}", postId);
+
+        Post post   = postRepository.findById(postId)
                 .orElseThrow(()-> new ResourceNotFoundException("Post not Found"));
         comment.setPost(post);
 
         Comment savedComment = commentRepository.save(comment);
-        CommentDto dto = new CommentDto();
-        dto.setId(savedComment.getId());
-        dto.setContent(savedComment.getContent());
-        return dto;
+        logger.info("Comment saved with id : {}",savedComment.getId());
+
+        return mapToDto(savedComment);
     }
 
     public List<CommentDto> getCommentsByPostId(Long postId){
+
+        logger.info("Fetching comments for postId : {}", postId);
 
         List<Comment> comments = commentRepository.findByPostId(postId);
         List<CommentDto> dtos = new ArrayList<>();
 
         for(Comment comment : comments){
-            CommentDto dto =new CommentDto();
-            dto.setId(comment.getId());
-            dto.setContent(comment.getContent());
-            dtos.add(dto);
+
+            dtos.add(mapToDto(comment));
         }
         return  dtos;
+    }
+
+    private CommentDto mapToDto(Comment comment){
+
+        CommentDto dto = new CommentDto();
+        dto.setId(comment.getId());
+        dto.setContent(comment.getContent());
+
+        return dto;
     }
 }
