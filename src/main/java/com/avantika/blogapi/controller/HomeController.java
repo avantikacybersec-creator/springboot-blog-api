@@ -8,6 +8,6 @@ public class HomeController {
 
     @GetMapping("/")
     public String home() {
-        return "Blog API is running ";
+        return "Blog API is running";
     }
 }
